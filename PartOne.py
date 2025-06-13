@@ -23,8 +23,35 @@ def fk_level(text, d):
     Returns:
         float: The Flesch-Kincaid Grade Level of the text. (higher grade is more difficult)
     """
-    pass
+    """Returns the Flesch-Kincaid Grade Level of a text (higher grade is more difficult).
+    Requires a dictionary of syllables per word.
 
+    Args:
+        text (str): The text to analyze.
+        d (dict): A dictionary of syllables per word.
+
+    Returns:
+        float: The Flesch-Kincaid Grade Level of the text.
+    """
+    doc = nlp(text)
+
+    total_sentences = len(list(doc.sents))
+    total_words = 0
+    total_syllables = 0
+
+    for token in doc:
+        if token.is_alpha:
+            word = token.text.lower()
+            syllables = d.get(word, 1)  # default to 1 syllable if unknown
+            total_syllables += syllables
+            total_words += 1
+
+    if total_sentences == 0 or total_words == 0:
+        return 0.0
+
+    fk_grade = 0.39 * (total_words / total_sentences) + 11.8 * (total_syllables / total_words) - 15.59
+    return round(fk_grade, 2)
+print(fk_level())
 
 def count_syl(word, d):
     """Counts the number of syllables in a word given a dictionary of syllables per word.
