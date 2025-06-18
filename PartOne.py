@@ -72,10 +72,45 @@ def count_syl(word, d):
     return max(1, len(re.findall(r'[aeiouy]+', word)))
 
 
+
 def read_novels(path=Path.cwd() / "texts" / "novels"):
     """Reads texts from a directory of .txt files and returns a DataFrame with the text, title,
-    author, and year"""
-    pass
+    author, and year. The DataFrame is sorted by year (as integer) and index is reset."""
+    data = []
+    path = Path(path)
+    for file in path.glob("*.txt"):
+        # Extract metadata from filename: Title-Author-Year.txt
+        name = file.stem  # Remove .txt
+        try:
+            # Split on last two dashes for author and year
+            parts = name.rsplit("-", 2)
+            if len(parts) == 3:
+                title, author, year = parts
+            else:
+                title, author, year = parts[0], "Unknown", "Unknown"
+        except Exception:
+            title, author, year = name, "Unknown", "Unknown"
+        with open(file, "r", encoding="utf-8") as f:
+            text = f.read()
+        data.append({
+            "text": text,
+            "title": title.replace("_", " "),
+            "author": author.replace("_", " "),
+            "year": year
+        })
+    df = pd.DataFrame(data, columns=['text', 'title', 'author', 'year'])
+   
+    # Convert year to int for sorting, handle non-integer years gracefully
+    def to_int(val):
+        try:
+            return int(val)
+        except:
+            return float('inf')
+    df['year'] = df['year'].apply(to_int)
+    df = df.sort_values('year').reset_index(drop=True)
+    return df
+
+
 
 
 def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
