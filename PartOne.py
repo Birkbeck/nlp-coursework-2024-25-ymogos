@@ -110,13 +110,31 @@ def read_novels(path=Path.cwd() / "texts" / "novels"):
     df = df.sort_values('year').reset_index(drop=True)
     return df
 
-
-
-
 def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
-    pass
+    store_path = Path(store_path)
+    store_path.mkdir(parents=True, exist_ok=True)
+    parsed_docs = []
+    for i, text in enumerate(df["text"]):
+        print(f"Parsing text {i+1}/{len(df)}: {df['title'].iloc[i]}")
+        # Handle long texts by splitting if needed
+        if len(text) > nlp.max_length:
+            docs = []
+            for j in range(0, len(text), nlp.max_length):
+                docs.append(nlp(text[j:j+nlp.max_length]))
+            # Concatenate Doc objects
+            from spacy.tokens import Doc
+            doc = Doc.from_docs(docs)
+        else:
+            doc = nlp(text)
+        parsed_docs.append(doc)
+    df = df.copy()
+    df["parsed"] = parsed_docs
+    out_path = store_path / out_name
+    df.to_pickle(out_path)
+    return df
+
 
 
 def nltk_ttr(text):
