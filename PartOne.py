@@ -1,3 +1,4 @@
+
 #Re-assessment template 2025
 
 # Note: The template functions here and the dataframe format for structuring your solution is a suggested but not mandatory approach. You can use a different approach if you like, as long as you clearly answer the questions and communicate your answers clearly.
@@ -5,6 +6,9 @@
 import nltk
 import spacy
 from pathlib import Path
+import pandas as pd
+from collections import Counter
+import math
 
 
 nlp = spacy.load("en_core_web_sm")
@@ -21,16 +25,6 @@ def fk_level(text, d):
         d (dict): A dictionary of syllables per word.
 
     Returns:
-        float: The Flesch-Kincaid Grade Level of the text. (higher grade is more difficult)
-    """
-    """Returns the Flesch-Kincaid Grade Level of a text (higher grade is more difficult).
-    Requires a dictionary of syllables per word.
-
-    Args:
-        text (str): The text to analyze.
-        d (dict): A dictionary of syllables per word.
-
-    Returns:
         float: The Flesch-Kincaid Grade Level of the text.
     """
     # Tokenize into sentences and words
@@ -38,7 +32,16 @@ def fk_level(text, d):
     words = nltk.word_tokenize(text)
 
     # Count total syllables using dictionary
-    syllables = sum(d.get(word.lower(), 1) for word in words if word.isalpha())
+    def count_syllables(word):
+        word = word.lower()
+        if word in d:
+            # Count phonemes that end with a digit (stressed syllables)
+            return len([ph for ph in d[word][0] if ph[-1].isdigit()])
+        # Estimate syllables if word not in dictionary
+        import re
+        return max(1, len(re.findall(r'[aeiouy]+', word)))
+
+    syllables = sum(count_syllables(word) for word in words if word.isalpha())
 
     num_sentences = len(sentences)
     num_words = len([word for word in words if word.isalpha()])
@@ -60,7 +63,13 @@ def count_syl(word, d):
     Returns:
         int: The number of syllables in the word.
     """
-    pass
+    word = word.lower()
+    if word in d:
+        # CMU dict: list of pronunciations, each is a list of phonemes
+        return len([ph for ph in d[word][0] if ph[-1].isdigit()])
+    # Estimate: count contiguous vowel groups
+    import re
+    return max(1, len(re.findall(r'[aeiouy]+', word)))
 
 
 def read_novels(path=Path.cwd() / "texts" / "novels"):
