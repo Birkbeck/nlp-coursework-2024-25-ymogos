@@ -198,8 +198,15 @@ def subjects_by_verb_pmi(doc, target_verb):
 
 def subjects_by_verb_count(doc, verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
-    pass
-
+    from collections import Counter
+    subjects = []
+    verb = verb.lower()
+    for token in doc:
+        if token.pos_ == "VERB" and token.lemma_.lower() == verb:
+            for child in token.children:
+                if child.dep_ in ("nsubj", "nsubjpass"):
+                    subjects.append(child.lemma_.lower())
+    return Counter(subjects).most_common(10)
 
 
 def adjective_counts(doc):
