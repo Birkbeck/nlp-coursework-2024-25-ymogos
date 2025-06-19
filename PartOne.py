@@ -210,8 +210,23 @@ def subjects_by_verb_count(doc, verb):
 
 
 def adjective_counts(doc):
-    """Extracts the most common adjectives in a parsed document. Returns a list of tuples."""
-    pass
+    """Extracts the most common adjectives in a parsed document. Returns a list of tuples.
+    Can handle both a single spaCy Doc object or a DataFrame with a 'parsed' column."""
+    from collections import Counter
+    
+    def count_adjectives(d):
+        adjs = [token.lemma_.lower() for token in d if token.pos_ == "ADJ"]
+        return Counter(adjs).most_common(10)
+    
+    if isinstance(doc, pd.DataFrame):
+        # If input is a DataFrame, process each document in the 'parsed' column
+        results = {}
+        for i, row in doc.iterrows():
+            results[row["title"]] = count_adjectives(row["parsed"])
+        return results
+    else:
+        # If input is a single Doc object
+        return count_adjectives(doc)
 
 
 
