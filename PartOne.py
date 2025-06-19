@@ -164,7 +164,35 @@ def get_fks(df):
 
 def subjects_by_verb_pmi(doc, target_verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
-    pass
+    target_verb = target_verb.lower()
+    subjects = []
+    all_subjects = []
+    all_verbs = []
+    for token in doc:
+        if token.pos_ == "VERB":
+            all_verbs.append(token.lemma_.lower())
+            for child in token.children:
+                if child.dep_ in ("nsubj", "nsubjpass"):
+                    all_subjects.append(child.lemma_.lower())
+                    if token.lemma_.lower() == target_verb:
+                        subjects.append(child.lemma_.lower())
+    subj_counts = Counter(all_subjects)
+    verb_count = all_verbs.count(target_verb)
+    subj_verb_counts = Counter(subjects)
+    total_verbs = len(all_verbs)
+    total_subjects = len(all_subjects)
+    pmi_scores = {}
+    for subj, joint in subj_verb_counts.items():
+        p_subj = subj_counts[subj] / total_subjects if total_subjects else 0
+        p_verb = verb_count / total_verbs if total_verbs else 0
+        p_joint = joint / verb_count if verb_count else 0
+        if p_subj > 0 and p_verb > 0 and p_joint > 0:
+            pmi_scores[subj] = math.log2(p_joint / (p_subj * p_verb))
+        else:
+            pmi_scores[subj] = float('-inf')
+    # Return top 10 by PMI
+    return sorted(pmi_scores.items(), key=lambda x: x[1], reverse=True)[:10]
+
 
 
 
