@@ -234,17 +234,17 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    #path = Path.cwd() / "p1-texts" / "novels"
-    #print(path)
-    #df = read_novels(path) # this line will fail until you have completed the read_novels function above.
-    #print(df.head())
-    #nltk.download("cmudict")
-    #parse(df)
-    #print(df.head())
-    #print(get_ttrs(df))
-    #print(get_fks(df))
-    #df = pd.read_pickle(Path.cwd() / "pickles" /"name.pickle")
-    # print(adjective_counts(df))
+    path = Path.cwd() / "p1-texts" / "p1-texts" / "novels"
+    print(path)
+    df = read_novels(path) # this line will fail until you have completed the read_novels function above.
+    print(df.head())
+    nltk.download("cmudict")
+    parse(df)
+    print(df.head())
+    print(get_ttrs(df))
+    print(get_fks(df))
+    df = pd.read_pickle(Path.cwd() / "pickles" /"parsed.pickle")
+    print(adjective_counts(df))
     """ 
     for i, row in df.iterrows():
         print(row["title"])
