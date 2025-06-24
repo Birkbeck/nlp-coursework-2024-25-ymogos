@@ -7,7 +7,7 @@ from sklearn.metrics import f1_score, classification_report
 # Part - a
 # i
 # Read the CSV file from the 'texts' directory
-df = pd.read_csv("p2-texts\p2-texts")
+df = pd.read_csv("nlp-coursework-2024-25-ymogos\p2-texts\p2-texts\hansard40000.csv")
 
 # Replace 'Labour (Co-op)' with 'Labour' in the 'party' column
 df['party'] = df['party'].replace('Labour (Co-op)', 'Labour')
@@ -23,8 +23,8 @@ top_parties = df['party'].value_counts().nlargest(4).index
 df = df[df['party'].isin(top_parties)]
 
 #  check result
-# print(df['party'].value_counts())
-# print(top_parties)
+#print(df['party'].value_counts())
+#print(top_parties)
 
 # iii
 df = df[df['speech_class'] == 'Speech']
@@ -59,26 +59,25 @@ X_train, X_test, y_train, y_test = train_test_split(
 #print(f"Train shape: {X_train.shape}, Test shape: {X_test.shape}")
 #print(f"Train class distribution:\n{y_train.value_counts(normalize=True)}")
 
-# Part - c
+# Part - c (Classifiers)
+def run_classifiers(X_train, X_test, y_train, y_test):
+    # Random Forest
+    rf = RandomForestClassifier(n_estimators=300, random_state=26)
+    rf.fit(X_train, y_train)
+    y_pred_rf = rf.predict(X_test)
+    print(f"RandomForest Macro F1: {f1_score(y_test, y_pred_rf, average='macro'):.4f}")
+    print(classification_report(y_test, y_pred_rf, zero_division=0))
+    # SVM
+    svm = SVC(kernel='linear', random_state=26)
+    svm.fit(X_train, y_train)
+    y_pred_svm = svm.predict(X_test)
+    print(f"SVM Macro F1: {f1_score(y_test, y_pred_svm, average='macro'):.4f}")
+    print(classification_report(y_test, y_pred_svm, zero_division=0))
+#run_classifiers(X_train, X_test, y_train, y_test)
 
-# ----- Random Forest -----
-rf = RandomForestClassifier(n_estimators=300, random_state=26)
-rf.fit(X_train, y_train)
-rf_preds = rf.predict(X_test)
-
-print("🔍 Random Forest Results:")
-print("Macro F1 score:", f1_score(y_test, rf_preds, average='macro'))
-print("Classification Report:\n", classification_report(y_test, rf_preds))
-
-
-# ----- SVM (Linear Kernel) -----
-svm = SVC(kernel='linear', random_state=26)
-svm.fit(X_train, y_train)
-svm_preds = svm.predict(X_test)
-
-print("\n🔍 SVM (Linear Kernel) Results:")
-print("Macro F1 score:", f1_score(y_test, svm_preds, average='macro'))
-print("Classification Report:\n", classification_report(y_test, svm_preds))
-
-
-
+# Part - d (N-gram Features)
+tfidf_ngram = TfidfVectorizer(stop_words=None, max_features=3000, ngram_range=(1,3))
+X_ngram = tfidf_ngram.fit_transform(df['speech'])
+X_train_ng, X_test_ng, y_train_ng, y_test_ng = train_test_split(
+    X_ngram, y, test_size=0.2, random_state=26, stratify=y)
+run_classifiers(X_train_ng, X_test_ng, y_train_ng, y_test_ng)
