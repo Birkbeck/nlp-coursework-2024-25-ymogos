@@ -1,9 +1,12 @@
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import f1_score, classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, f1_score
+import numpy as np
+import re
+
 # Part - a
 # i
 # Read the CSV file from the 'texts' directory
@@ -80,4 +83,39 @@ tfidf_ngram = TfidfVectorizer(stop_words=None, max_features=3000, ngram_range=(1
 X_ngram = tfidf_ngram.fit_transform(df['speech'])
 X_train_ng, X_test_ng, y_train_ng, y_test_ng = train_test_split(
     X_ngram, y, test_size=0.2, random_state=26, stratify=y)
-run_classifiers(X_train_ng, X_test_ng, y_train_ng, y_test_ng)
+#run_classifiers(X_train_ng, X_test_ng, y_train_ng, y_test_ng)
+
+# Part - e (Custom Tokenizer)
+def custom_tokenizer(text):
+    # Example: simple lemmatization, remove numbers, keep words >2 chars
+    tokens = re.findall(r"\b[a-zA-Z]{3,}\b", text.lower())
+    return tokens
+
+tfidf_custom = TfidfVectorizer(tokenizer=custom_tokenizer, max_features=3000)
+X_custom = tfidf_custom.fit_transform(df['speech'])
+X_train_c, X_test_c, y_train_c, y_test_c = train_test_split(
+    X_custom, y, test_size=0.2, random_state=26, stratify=y)
+
+# Try both classifiers, print best
+rf_c = RandomForestClassifier(n_estimators=300, random_state=26)
+rf_c.fit(X_train_c, y_train_c)
+y_pred_rf_c = rf_c.predict(X_test_c)
+rf_f1 = f1_score(y_test_c, y_pred_rf_c, average='macro')
+
+svm_c = SVC(kernel='linear', random_state=26)
+svm_c.fit(X_train_c, y_train_c)
+y_pred_svm_c = svm_c.predict(X_test_c)
+svm_f1 = f1_score(y_test_c, y_pred_svm_c, average='macro')
+
+if rf_f1 >= svm_f1:
+    print("Custom Tokenizer - RandomForestClassifier")
+    print(f"Macro F1: {rf_f1:.4f}")
+    print(classification_report(y_test_c, y_pred_rf_c, zero_division=0))
+    best_model = 'RandomForestClassifier'
+    best_f1 = rf_f1
+else:
+    print("Custom Tokenizer - SVM")
+    print(f"Macro F1: {svm_f1:.4f}")
+    print(classification_report(y_test_c, y_pred_svm_c, zero_division=0))
+    best_model = 'SVM'
+    best_f1 = svm_f1
