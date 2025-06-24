@@ -119,3 +119,13 @@ else:
     print(classification_report(y_test_c, y_pred_svm_c, zero_division=0))
     best_model = 'SVM'
     best_f1 = svm_f1
+
+# Part - f (Explanation)
+print("\nExplanation:")
+print("""
+The custom tokenizer lowercases the text, removes numbers and punctuation, and keeps only words with 
+      at least 3 letters. This reduces noise and focuses on meaningful tokens, which can help the 
+      classifier generalize better. The performance is reported above for the best classifier. 
+      The trade-off is between capturing enough information for classification and keeping the feature
+       space efficient (max 3000 features).
+""")
