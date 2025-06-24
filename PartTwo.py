@@ -7,7 +7,7 @@ from sklearn.metrics import classification_report, f1_score
 import numpy as np
 import re
 
-# Part - a
+# Part - a (Data preparation)
 # i
 # Read the CSV file from the 'texts' directory
 df = pd.read_csv("nlp-coursework-2024-25-ymogos\p2-texts\p2-texts\hansard40000.csv")
@@ -39,7 +39,7 @@ df = df[df['speech'].str.len() >= 1000]
 # Print the dimensions: (rows, columns)
 #print(df.shape)
 
-# Part - b
+# Part - b (Vectorization and split)
 
 # Step 1: Initialize the vectorizer
 vectorizer = TfidfVectorizer(stop_words='english', max_features=3000)
@@ -58,7 +58,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=26           # for reproducibility
 )
 
-# Step 5: Check result
+
 #print(f"Train shape: {X_train.shape}, Test shape: {X_test.shape}")
 #print(f"Train class distribution:\n{y_train.value_counts(normalize=True)}")
 
@@ -127,5 +127,7 @@ The custom tokenizer lowercases the text, removes numbers and punctuation, and k
       at least 3 letters. This reduces noise and focuses on meaningful tokens, which can help the 
       classifier generalize better. The performance is reported above for the best classifier. 
       The trade-off is between capturing enough information for classification and keeping the feature
+      
+      
        space efficient (max 3000 features).
 """)

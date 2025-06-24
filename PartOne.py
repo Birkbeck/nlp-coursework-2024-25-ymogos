@@ -234,7 +234,7 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    path = Path.cwd() / "p1-texts" / "p1-texts" / "novels"
+    path = Path.cwd() / "nlp-coursework-2024-25-ymogos/p1-texts/p1-texts/novels"
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     print(df.head())
